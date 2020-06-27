@@ -1,0 +1,7 @@
+<Mod
+	name="Persistence"
+	description=""
+	tags="gameplay,game modes,tweaks"
+	dont_upload_folders=".vscode|.git"
+	dont_upload_files=".gitignore|README.md">
+</Mod>

@@ -1,0 +1,6 @@
+<Entity name="persistence_edit_wands_in_lobby">
+	<GameEffectComponent
+	effect="EDIT_WANDS_EVERYWHERE"
+	frames="-1">
+	</GameEffectComponent>
+</Entity>

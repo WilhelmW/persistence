@@ -1,0 +1,15 @@
+<Entity name="persistence_lobby_collider" tags="teleportable_NOT">
+	<CollisionTriggerComponent
+		width="100"
+		height="100"
+		radius="100"
+		destroy_this_entity_when_triggered="0"
+		required_tag="player_unit"
+		_enabled="0">
+	</CollisionTriggerComponent>
+	<LuaComponent
+		script_collision_trigger_hit="mods/persistence/files/lobby_collider.lua"
+		execute_every_n_frame="1"
+		_enabled="0">
+	</LuaComponent>
+</Entity>
