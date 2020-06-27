@@ -8,7 +8,6 @@ local is_in_lobby = false;
 local inventory_open = false;
 local teleport_component;
 local screen_size_x, screen_size_y;
-local mouse_x, mouse_y;
 
 local function enter_lobby()
 	enable_edit_wands_in_lobby();
@@ -45,12 +44,12 @@ function get_screen_size()
 	return screen_size_x, screen_size_y;
 end
 
-function get_mouse_pos()
-	return mouse_x, mouse_y;
-end
-
 local is_post_player_spawned = false;
 function OnWorldPostUpdate()
+	if player_id == nil or not EntityGetIsAlive(player_id) then
+		return;
+	end
+
 	if teleport_component ~= nil then
 		local a, b, c, d = ComponentGetValue2(teleport_component, "source_location_camera_aabb");
 		if a ~= 0 or b ~= 0 or c ~= 0 or d ~= 0 then
@@ -61,9 +60,6 @@ function OnWorldPostUpdate()
 		end
 	end
 
-	if player_id == nil then
-		return;
-	end
 	if not is_post_player_spawned then
 		OnPostPlayerSpawned();
 		is_post_player_spawned = true;
@@ -72,8 +68,6 @@ function OnWorldPostUpdate()
 	if get_selected_save_id == nil or get_selected_save_id() == 0 then
 		return;
 	end
-
-	mouse_x, mouse_y = ComponentGetValue2(controls_component, "mMousePosition");
 
 	if gui_update ~= nil then
 		gui_update();
