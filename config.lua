@@ -4,6 +4,7 @@ mod_config = {
 	research_spell_price_multiplier = 10,
 	buy_wand_price_multiplier = 1,
 	buy_spell_price_multiplier = 1,
+	enable_teleport_back_up = true;
 	default_wands = {
 		{
 			name = "Handgun",

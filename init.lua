@@ -8,6 +8,8 @@ local is_in_lobby = false;
 local inventory_open = false;
 local teleport_component;
 local screen_size_x, screen_size_y;
+local lobby_collider;
+local lobby_x, lobby_y;
 
 local function enter_lobby()
 	enable_edit_wands_in_lobby();
@@ -17,6 +19,10 @@ end
 local function exit_lobby()
 	disable_edit_wands_in_lobby();
 	hide_lobby_gui();
+end
+
+function teleport_back_to_lobby()
+	EntitySetTransform(player_id, lobby_x, lobby_y);
 end
 
 function disable_controlls()
@@ -45,6 +51,7 @@ function get_screen_size()
 end
 
 local is_post_player_spawned = false;
+local is_in_workshop = false;
 function OnWorldPostUpdate()
 	if player_id == nil or not EntityGetIsAlive(player_id) then
 		return;
@@ -91,6 +98,28 @@ function OnWorldPostUpdate()
 			exit_lobby();
 		end
 	end
+	if mod_config.enable_teleport_back_up then
+		local px, py = EntityGetTransform(player_id);
+		local is_in_workshop_before = is_in_workshop;
+		is_in_workshop = false;
+		for _, workshop in ipairs(EntityGetWithTag("workshop")) do
+			local x, y = EntityGetTransform(workshop);
+			local hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent");
+			local min_x = tonumber(ComponentGetValue(hitbox_comp, "aabb_min_x")) + x;
+			local min_y = tonumber(ComponentGetValue(hitbox_comp, "aabb_min_y")) + y;
+			local max_x = tonumber(ComponentGetValue(hitbox_comp, "aabb_max_x")) + x;
+			local max_y = tonumber(ComponentGetValue(hitbox_comp, "aabb_max_y")) + y;
+			if aabb_check(px, py, min_x, min_y, max_x, max_y) then
+				if not is_in_workshop and not is_in_workshop_before then
+					show_teleport_gui();
+				end
+				is_in_workshop = true;
+			end
+		end
+		if not is_in_workshop and is_in_workshop_before then
+			hide_teleport_gui();
+		end
+	end
 	if tonumber(ComponentGetValue(inventory_gui, "mActive")) == 1 then
 		if not inventory_open then
 			inventory_open = true;
@@ -117,11 +146,13 @@ function OnPlayerSpawned(player_entity)
 	inventory2 = EntityGetFirstComponentIncludingDisabled(player_id, "Inventory2Component");
 	controls_component = EntityGetFirstComponentIncludingDisabled(player_id, "ControlsComponent");
 
-	local lobby_collider = EntityGetWithName("persistence_lobby_collider");
+	lobby_collider = EntityGetWithName("persistence_lobby_collider");
 	if lobby_collider == nil or lobby_collider == 0 then
+		print("lobby collider spawned");
 		local x, y = EntityGetTransform(player_id);
-		EntityLoad("mods/persistence/files/lobby_collider.xml", x, y);
+		lobby_collider = EntityLoad("mods/persistence/files/lobby_collider.xml", x, y);
 	end
+	lobby_x, lobby_y = EntityGetTransform(lobby_collider);
 
 	update_screen_size();
 end
@@ -138,10 +169,11 @@ function OnPostPlayerSpawned()
 	if selected_save_id == nil then
 		if not get_run_created_with_mod() then
 			set_selected_save_id(0);
+		else
+			load_save_ids();
+			disable_controlls();
+			show_save_selector_gui();
 		end
-		load_save_ids();
-		disable_controlls();
-		show_save_selector_gui();
 	else
 		if selected_save_id ~= 0 then
 			load(selected_save_id);
@@ -151,7 +183,6 @@ function OnPostPlayerSpawned()
 end
 
 function OnSaveAvailable(save_id)
-	local lobby_collider = EntityGetWithName("persistence_lobby_collider");
 	for _, comp in ipairs(EntityGetAllComponents(lobby_collider)) do
 		EntitySetComponentIsEnabled(lobby_collider, comp, true);
 	end

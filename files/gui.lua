@@ -149,12 +149,33 @@ function hide_money_gui()
 	active_windows["money"] = nil;
 end
 
+function show_teleport_gui()
+	local teleport_confirmation = false;
+	active_windows["teleport"] = function(get_next_id)
+		GuiLayoutBeginHorizontal(gui, 45, 1);
+		if teleport_confirmation then
+			if GuiButton(gui, 0, 0, "Press again to teleport", get_next_id()) then
+				teleport_back_to_lobby();
+			end
+		else
+			if GuiButton(gui, 0, 0, "Teleport back up", get_next_id()) then
+				teleport_confirmation = true;
+			end
+		end
+		GuiLayoutEnd(gui);
+	end;
+end
+
+function hide_teleport_gui()
+	active_windows["teleport"] = nil;
+end
+
 local research_wands_open = false;
 function show_research_wands_gui()
 	research_wands_open = true;
 	local wand_entity_ids = get_all_wands();
 	local wands = {};
-	
+
 	for pos, entity_id in pairs(wand_entity_ids) do
 		wands[pos] = {
 			["entity_id"] = entity_id;

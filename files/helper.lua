@@ -39,3 +39,7 @@ function simple_string_hash(text) --don't use it for storing passwords...
 	end
 	return sum;
 end
+
+function aabb_check(x, y, min_x, min_y, max_x, max_y)
+	return x > min_x and x < max_x and y > min_y and y < max_y;
+end
