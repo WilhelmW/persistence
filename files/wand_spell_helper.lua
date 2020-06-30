@@ -98,8 +98,8 @@ function create_wand_price(wand_data)
 		price = price + 100;
 	end
 	price = price + (wand_data["spells_per_cast"] - 1) * 500;
-	price = price + 500 / (wand_data["cast_delay"] / 60 + 1);
-	price = price + 500 / (wand_data["recharge_time"] / 60 + 1);
+	price = price + (0.01 ^ (wand_data["cast_delay"] / 60 - 1.8) + 200) * 0.1;
+	price = price + (0.01 ^ (wand_data["recharge_time"] / 60 - 1.8) + 200) * 0.1;
 	price = price + wand_data["mana_max"];
 	price = price + wand_data["mana_charge_speed"] * 2;
 	price = price + (wand_data["capacity"] - 1) * 50;

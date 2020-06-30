@@ -482,20 +482,20 @@ function research_wand_price(save_id, entity_id)
 		price = price + (wand_data["spells_per_cast"] - spells_per_cast) * 1000;
 	end
 	if cast_delay_min == nil or cast_delay_max == nil then
-		price = price + 500 / (wand_data["cast_delay"] / 60 + 0.1);
+		price = price + 0.01 ^ (wand_data["cast_delay"] / 60 - 1.8) + 200;
 	else
 		if wand_data["cast_delay"] < cast_delay_min then
-			price = price + (500 / (wand_data["cast_delay"] / 60 + 0.1)) - (500 / (cast_delay_min / 60 + 0.1));
+			price = price + (0.01 ^ (wand_data["cast_delay"] / 60 - 1.8) + 200) - (0.01 ^ (cast_delay_min / 60 - 1.8) + 200);
 		end
 		if wand_data["cast_delay"] > cast_delay_max then
 			price = price + (wand_data["cast_delay"] / 60 - cast_delay_max / 60) * 100;
 		end
 	end
 	if recharge_time_min == nil or recharge_time_max == nil then
-		price = price + 500 / (wand_data["recharge_time"] / 60 + 0.1);
+		price = price + 0.01 ^ (wand_data["recharge_time"] / 60 - 1.8) + 200;
 	else
 		if wand_data["recharge_time"] < recharge_time_min then
-			price = price + (500 / (wand_data["recharge_time"] / 60 + 0.1)) - (500 / (recharge_time_min / 60 + 0.1));
+			price = price + (0.01 ^ (wand_data["recharge_time"] / 60 - 1.8) + 200) - (0.01 ^ (recharge_time_min / 60 - 1.8) + 200);
 		end
 		if wand_data["recharge_time"] > recharge_time_max then
 			price = price + (wand_data["recharge_time"] / 60 - recharge_time_max / 60) * 100;
