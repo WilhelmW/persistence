@@ -470,16 +470,16 @@ function show_buy_wands_gui()
 				GuiLayoutBeginVertical(gui, 0, 0);
 				GuiText(gui, 0, 0, " ");
 				GuiText(gui, 0, 0, " ");
-				if wand_data_selected["cast_delay"] - 10 >= cast_delay_min then
+				if wand_data_selected["cast_delay"] - 6 >= cast_delay_min then
 					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] - 10;
+						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] - 6;
 					end
 				else
 					GuiButton(gui, 0, 0, "    ", get_next_id());
 				end
-				if wand_data_selected["recharge_time"] - 10 >= recharge_time_min then
+				if wand_data_selected["recharge_time"] - 6 >= recharge_time_min then
 					if GuiButton(gui, 0, 0, "<<", get_next_id()) then
-						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] - 10;
+						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] - 6;
 					end
 				else
 					GuiButton(gui, 0, 0, "    ", get_next_id());
@@ -663,16 +663,16 @@ function show_buy_wands_gui()
 				GuiLayoutBeginVertical(gui, 0, 0);
 				GuiText(gui, 0, 0, " ");
 				GuiText(gui, 0, 0, " ");
-				if wand_data_selected["cast_delay"] + 10 <= cast_delay_max then
+				if wand_data_selected["cast_delay"] + 6 <= cast_delay_max then
 					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] + 10;
+						wand_data_selected["cast_delay"] = wand_data_selected["cast_delay"] + 6;
 					end
 				else
 					GuiButton(gui, 0, 0, "    ", get_next_id());
 				end
-				if wand_data_selected["recharge_time"] + 10 <= recharge_time_max then
+				if wand_data_selected["recharge_time"] + 6 <= recharge_time_max then
 					if GuiButton(gui, 0, 0, ">>", get_next_id()) then
-						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] + 10;
+						wand_data_selected["recharge_time"] = wand_data_selected["recharge_time"] + 6;
 					end
 				else
 					GuiButton(gui, 0, 0, "    ", get_next_id());
