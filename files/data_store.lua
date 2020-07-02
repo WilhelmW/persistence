@@ -12,6 +12,14 @@ local data_store = {};
 local flag_prefix = "persistence";
 local selected_save_id;
 
+function get_save_count()
+	return 5;
+end
+
+function get_template_count()
+	return 5;
+end
+
 local function number_to_hex(number)
 	if number == nil then
 		return nil;
@@ -78,10 +86,6 @@ function load_save_ids()
 	return get_save_ids();
 end
 
-function get_save_count()
-	return 5;
-end
-
 function set_run_created_with_mod()
 	GameAddFlagRun(flag_prefix .. "_using_mod");
 end
@@ -123,7 +127,7 @@ end
 
 function create_new_save(save_id)
 	delete_save(save_id);
-	data_store[save_id] = {};
+	load(save_id);
 	AddFlagPersistent(flag_prefix .. "_" .. tostring(save_id));
 end
 
@@ -146,6 +150,10 @@ function delete_save(save_id)
 	end
 	for i = 1, #wands do
 		RemoveFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_wand_type_" .. sprite_file_to_wand_type(wands[i].file));
+	end
+
+	for i = 1, get_template_count() do
+		delete_template(save_id, i);
 	end
 
 	RemoveFlagPersistent(flag_prefix .. "_" .. save_id_string);
@@ -204,6 +212,40 @@ function load(save_id)
 		local wand_type = sprite_file_to_wand_type(wands[i].file);
 		if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_wand_type_" .. string.lower(wand_type)) then
 			data_store[save_id]["wand_types"][wand_type] = true;
+		end
+	end
+
+	data_store[save_id]["templates"] = {};
+	for i = 1, get_template_count() do
+		if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i)) then
+			data_store[save_id]["templates"][i] = {};
+			if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_shuffle") then
+				data_store[save_id]["templates"][i]["shuffle"] = true;
+			else
+				data_store[save_id]["templates"][i]["shuffle"] = false;
+			end
+			data_store[save_id]["templates"][i]["spells_per_cast"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_spells_per_cast"));
+			data_store[save_id]["templates"][i]["cast_delay"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_cast_delay"));
+			data_store[save_id]["templates"][i]["recharge_time"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_recharge_time"));
+			data_store[save_id]["templates"][i]["mana_max"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_mana_max"));
+			data_store[save_id]["templates"][i]["mana_charge_speed"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_mana_charge_speed"));
+			data_store[save_id]["templates"][i]["capacity"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_capacity"));
+			data_store[save_id]["templates"][i]["spread"] = hex_to_number(load_hex(save_id_string .. "_template_" .. tostring(i) .. "_spread")) / 10;
+
+			data_store[save_id]["templates"][i]["always_cast_spells"] = {};
+			for key, _ in pairs(data_store[save_id]["always_cast_spells"]) do
+				if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_always_cast_spell_" .. string.lower(key)) then
+					table.insert(data_store[save_id]["templates"][i]["always_cast_spells"], key);
+					break;
+				end
+			end
+
+			for key, _ in pairs(data_store[save_id]["wand_types"]) do
+				if HasFlagPersistent(flag_prefix .. "_" .. save_id_string .. "_template_" .. tostring(i) .. "_wand_type_" .. string.lower(key)) then
+					data_store[save_id]["templates"][i]["wand_type"] = key;
+					break;
+				end
+			end
 		end
 	end
 end
@@ -455,6 +497,77 @@ local function add_wand_types(save_id, wand_types)
 			data_store[save_id]["wand_types"][wand_types[i]] = true;
 			AddFlagPersistent(flag_prefix .. "_" .. tostring(save_id) .. "_wand_type_" .. string.lower(wand_types[i]));
 		end
+	end
+end
+
+-- templates
+function get_template(save_id, template_id)
+	if data_store[save_id] == nil or data_store[save_id]["templates"] == nil then
+		return nil;
+	end
+	return data_store[save_id]["templates"][template_id];
+end
+
+function set_template(save_id, template_id, wand_data)
+	if data_store[save_id] == nil or data_store[save_id]["templates"] == nil then
+		return;
+	end
+	delete_template(save_id, template_id);
+	if wand_data == nil then
+		return;
+	end
+	local template_prefix = tostring(save_id) .. "_template_" .. tostring(template_id);
+	local template_flag_prefix = flag_prefix .. "_" .. template_prefix;
+	if wand_data["shuffle"] then
+		AddFlagPersistent(template_flag_prefix .. "_shuffle");
+	end
+	save_hex(template_prefix .. "_spells_per_cast", number_to_hex(wand_data["spells_per_cast"]));
+	save_hex(template_prefix .. "_cast_delay", number_to_hex(wand_data["cast_delay"]));
+	save_hex(template_prefix .. "_recharge_time", number_to_hex(wand_data["recharge_time"]));
+	save_hex(template_prefix .. "_mana_max", number_to_hex(wand_data["mana_max"]));
+	save_hex(template_prefix .. "_mana_charge_speed", number_to_hex(wand_data["mana_charge_speed"]));
+	save_hex(template_prefix .. "_capacity", number_to_hex(wand_data["capacity"]));
+	save_hex(template_prefix .. "_spread", number_to_hex(math.floor(wand_data["spread"] * 10 + 0.5)));
+
+	for _, spell in ipairs(wand_data["always_cast_spells"]) do
+		AddFlagPersistent(template_flag_prefix .. "_always_cast_spell_" .. string.lower(spell));
+	end
+
+	AddFlagPersistent(template_flag_prefix .. "_wand_type_" .. string.lower(wand_data["wand_type"]));
+
+	AddFlagPersistent(template_flag_prefix);
+	data_store[save_id]["templates"][template_id] = wand_data;
+end
+
+function delete_template(save_id, template_id)
+	if data_store[save_id] == nil then
+		return;
+	end
+	local template_prefix = tostring(save_id) .. "_template_" .. tostring(template_id);
+	local template_flag_prefix = flag_prefix .. "_" .. template_prefix;
+	RemoveFlagPersistent(template_flag_prefix .. "_shuffle");
+	save_hex(template_prefix .. "_spells_per_cast", nil);
+	save_hex(template_prefix .. "_cast_delay", nil);
+	save_hex(template_prefix .. "_recharge_time", nil);
+	save_hex(template_prefix .. "_mana_max", nil);
+	save_hex(template_prefix .. "_mana_charge_speed", nil);
+	save_hex(template_prefix .. "_capacity", nil);
+	save_hex(template_prefix .. "_spread", nil);
+
+	for i = 1, #actions do
+		RemoveFlagPersistent(template_flag_prefix .. "_always_cast_spell_" .. string.lower(actions[i].id));
+	end
+
+	for i = 1, #mod_config.default_wands do
+		RemoveFlagPersistent(template_flag_prefix .. "_wand_type_default_" .. tostring(i));
+	end
+	for i = 1, #wands do
+		RemoveFlagPersistent(template_flag_prefix .. "_wand_type_" .. string.lower(sprite_file_to_wand_type(wands[i].file)));
+	end
+
+	RemoveFlagPersistent(template_flag_prefix);
+	if data_store[save_id]["templates"] ~= nil then
+		data_store[save_id]["templates"][template_id] = nil;
 	end
 end
 

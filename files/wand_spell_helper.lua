@@ -97,12 +97,12 @@ function create_wand_price(wand_data)
 	if not wand_data["shuffle"] then
 		price = price + 100;
 	end
-	price = price + (wand_data["spells_per_cast"] - 1) * 500;
+	price = price + math.max(wand_data["spells_per_cast"] - 1, 0) * 500;
 	price = price + (0.01 ^ (wand_data["cast_delay"] / 60 - 1.8) + 200) * 0.1;
 	price = price + (0.01 ^ (wand_data["recharge_time"] / 60 - 1.8) + 200) * 0.1;
 	price = price + wand_data["mana_max"];
 	price = price + wand_data["mana_charge_speed"] * 2;
-	price = price + (wand_data["capacity"] - 1) * 50;
+	price = price + math.max(wand_data["capacity"] - 1, 0) * 50;
 	price = price + math.abs(5 - wand_data["spread"]) * 5;
 	if wand_data["always_cast_spells"] ~= nil and #wand_data["always_cast_spells"] > 0 then
 		for i = 1, #wand_data["always_cast_spells"] do

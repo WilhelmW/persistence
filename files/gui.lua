@@ -353,6 +353,7 @@ function show_buy_wands_gui()
 			["always_cast_spells"] = {},
 			["wand_type"] = "default_1";
 		};
+		local delete_template_confirmation = 0;
 
 		local spells_page_number = 1;
 		local spell_data = {};
@@ -753,6 +754,31 @@ function show_buy_wands_gui()
 				GuiLayoutEnd(gui);
 				GuiLayoutEnd(gui);
 				gui_sprite(22, 48, wand_type_to_sprite_file(wand_data_selected["wand_type"]));
+
+				GuiLayoutBeginVertical(gui, 80, 50);
+				for i = 1, get_template_count() do
+					GuiText(gui, 0, 0, "Wand template slot " .. pad_number(i, #tostring(get_template_count())) .. ":");
+					if get_template(save_id, i) == nil then
+						if GuiButton(gui, 40, 0, "Save template", get_next_id()) then
+							set_template(save_id, i, wand_data_selected);
+						end
+					else
+						if GuiButton(gui, 40, 0, "Load template", get_next_id()) then
+							wand_data_selected = get_template(save_id, i);
+						end
+						if delete_template_confirmation == i then
+							if GuiButton(gui, 40, 0, "Press again to delete", get_next_id()) then
+								delete_template_confirmation = 0;
+								delete_template(save_id, i);
+							end
+						else
+							if GuiButton(gui, 40, 0, "Delete template", get_next_id()) then
+								delete_template_confirmation = i;
+							end
+						end
+					end
+				end
+				GuiLayoutEnd(gui);
 			elseif window_nr == 1 then
 				if spell_columns[spells_page_number * 2 - 1] ~= nil then
 					GuiLayoutBeginHorizontal(gui, 30, 15);

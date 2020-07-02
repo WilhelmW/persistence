@@ -3,5 +3,5 @@
 	description=""
 	tags="gameplay,game modes,tweaks"
 	dont_upload_folders=".vscode|.git"
-	dont_upload_files=".gitignore|README.md">
+	dont_upload_files=".gitignore|README.md|files/debug.lua">
 </Mod>
