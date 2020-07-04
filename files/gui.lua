@@ -15,7 +15,7 @@ end
 
 function show_save_selector_gui()
 	local delete_save_confirmation = 0;
-	active_windows["save_selector"] = function (get_next_id)
+	active_windows["save_selector"] = { true, function (get_next_id)
 		GuiLayoutBeginVertical(gui, 1, 20);
 		for i = 1, get_save_count() do
 			GuiText(gui, 0, 0, "Save slot " .. pad_number(i, #tostring(get_save_count())) .. ":");
@@ -53,7 +53,7 @@ function show_save_selector_gui()
 			enable_controlls();
 		end
 		GuiLayoutEnd(gui);
-	end;
+	end };
 end
 
 function hide_save_selector_gui()
@@ -61,7 +61,7 @@ function hide_save_selector_gui()
 end
 
 function show_money_gui()
-	active_windows["money"] = function(get_next_id)
+	active_windows["money"] = { false, function(get_next_id)
 		local save_id = get_selected_save_id();
 		local safe_money = get_safe_money(save_id);
 		local player_money = get_player_money();
@@ -142,7 +142,7 @@ function show_money_gui()
 		GuiLayoutBeginHorizontal(gui, 86, 31);
 		GuiText(gui, 0, 0, " $" .. tostring(safe_money));
 		GuiLayoutEnd(gui);
-	end;
+	end };
 end
 
 function hide_money_gui()
@@ -151,7 +151,7 @@ end
 
 function show_teleport_gui()
 	local teleport_confirmation = false;
-	active_windows["teleport"] = function(get_next_id)
+	active_windows["teleport"] = { false, function(get_next_id)
 		GuiLayoutBeginHorizontal(gui, 45, 1);
 		if teleport_confirmation then
 			if GuiButton(gui, 0, 0, "Press again to teleport", get_next_id()) then
@@ -163,7 +163,7 @@ function show_teleport_gui()
 			end
 		end
 		GuiLayoutEnd(gui);
-	end;
+	end };
 end
 
 function hide_teleport_gui()
@@ -184,7 +184,7 @@ function show_research_wands_gui()
 		};
 	end
 
-	active_windows["research_wands"] = function(get_next_id)
+	active_windows["research_wands"] = { true, function(get_next_id)
 		local player_money = get_player_money();
 		GuiLayoutBeginHorizontal(gui, 30, 30);
 		GuiLayoutBeginVertical(gui, 0, 0);
@@ -249,7 +249,7 @@ function show_research_wands_gui()
 		end
 		GuiLayoutEnd(gui);
 		GuiLayoutEnd(gui);
-	end;
+	end };
 end
 
 function hide_research_wands_gui()
@@ -284,7 +284,7 @@ function show_research_spells_gui()
 	end
 	table.sort(spell_data, function(a, b) return a.name < b.name end);
 
-	active_windows["research_spells"] = function(get_next_id)
+	active_windows["research_spells"] = { true, function(get_next_id)
 		if #spell_data > 0 then
 			local player_money = get_player_money();
 			GuiLayoutBeginHorizontal(gui, 40, 15);
@@ -315,7 +315,7 @@ function show_research_spells_gui()
 			GuiText(gui, 0, 0, "No new spells to research");
 			GuiLayoutEnd(gui);
 		end
-	end;
+	end };
 end
 
 function hide_research_spells_gui()
@@ -404,7 +404,7 @@ function show_buy_wands_gui()
 		table.sort(wand_type_list, function(a, b) return a.wand_type < b.wand_type end);
 		local wand_type_columns = split_array(wand_type_list, 5);
 
-		active_windows["buy_wands"] = function(get_next_id)
+		active_windows["buy_wands"] = { true, function(get_next_id)
 			local player_money = get_player_money();
 			local price = create_wand_price(wand_data_selected);
 			if window_nr == 0 then
@@ -901,13 +901,13 @@ function show_buy_wands_gui()
 				end
 			end
 			GuiLayoutEnd(gui);
-		end;
+		end };
 	else
-		active_windows["buy_wands"] = function(get_next_id)
+		active_windows["buy_wands"] = { true, function(get_next_id)
 			GuiLayoutBeginHorizontal(gui, 40, 30);
 			GuiText(gui, 0, 0, "You don't have enough research to create a wand");
 			GuiLayoutEnd(gui);
-		end;
+		end };
 	end
 end
 
@@ -936,7 +936,7 @@ function show_buy_spells_gui()
 	table.sort(spell_data, function(a, b) return a.name < b.name end);
 	local columns = split_array(spell_data, 20);
 
-	active_windows["buy_spells"] = function(get_next_id)
+	active_windows["buy_spells"] = { true, function(get_next_id)
 		local player_money = get_player_money();
 		if columns[page_number * 2 - 1] ~= nil then
 			GuiLayoutBeginHorizontal(gui, 30, 15);
@@ -1001,7 +1001,7 @@ function show_buy_spells_gui()
 			end
 			GuiLayoutEnd(gui);
 		end
-	end;
+	end };
 end
 
 function hide_buy_spells_gui()
@@ -1014,7 +1014,7 @@ function show_menu_gui()
 	hide_research_spells_gui();
 	hide_buy_wands_gui();
 	hide_buy_spells_gui();
-	active_windows["menu"] = function(get_next_id)
+	active_windows["menu"] = { false, function(get_next_id)
 		GuiLayoutBeginVertical(gui, 1, 30);
 		if GuiButton(gui, research_wands_open and 10 or 0, 0, "Research Wands", get_next_id()) then
 			hide_research_spells_gui();
@@ -1057,7 +1057,7 @@ function show_menu_gui()
 			end
 		end
 		GuiLayoutEnd(gui);
-	end;
+	end };
 end
 
 function hide_menu_gui()
@@ -1085,11 +1085,21 @@ end
 function gui_update()
 	if gui ~= nil then
 		if active_windows ~= nil then
+			local is_dark_background = false;
 			GuiStartFrame(gui);
+			for _, window in pairs(active_windows) do
+				if window[1] then
+					is_dark_background = true;
+				end
+			end
+			if is_dark_background then
+				local cx, cy = GameGetCameraPos();
+				GameCreateSpriteForXFrames("mods/persistence/files/gui_darken.png", cx, cy);
+			end
 			local start_gui_id = 14796823;
-			for name, func in pairs(active_windows) do
+			for name, window in pairs(active_windows) do
 				local gui_id = start_gui_id + simple_string_hash(name);
-				func(function()
+				window[2](function()
 					gui_id = gui_id + 1;
 					return gui_id;
 				end);
