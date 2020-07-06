@@ -4,7 +4,10 @@ mod_config = {
 	research_spell_price_multiplier = 10,
 	buy_wand_price_multiplier = 1,
 	buy_spell_price_multiplier = 1,
-	enable_teleport_back_up = true;
+	enable_edit_wands_in_lobby = true,
+	enable_teleport_back_up = true,
+	enable_menu_in_holy_mountain = false,
+	reuseable_holy_mountain = false,
 	default_wands = {
 		{
 			name = "Handgun",

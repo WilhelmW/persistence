@@ -11,7 +11,10 @@ function enable_edit_wands_in_lobby()
 end
 
 function disable_edit_wands_in_lobby()
-	EntityKill(EntityGetWithName("persistence_edit_wands_in_lobby"));
+	local entity_id = EntityGetWithName("persistence_edit_wands_in_lobby");
+	if entity_id ~= nil and entity_id ~= 0 then
+		EntityKill(entity_id);
+	end
 end
 
 function split_array(array, chunk_size)

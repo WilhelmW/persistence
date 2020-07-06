@@ -11,14 +11,19 @@ local screen_size_x, screen_size_y;
 local lobby_collider;
 local lobby_x, lobby_y;
 
+local menu_open = false;
 local function enter_lobby()
-	enable_edit_wands_in_lobby();
+	if mod_config.enable_edit_wands_in_lobby then
+		enable_edit_wands_in_lobby();
+	end
 	show_lobby_gui();
+	menu_open = true;
 end
 
 local function exit_lobby()
 	disable_edit_wands_in_lobby();
 	hide_lobby_gui();
+	menu_open = false;
 end
 
 function teleport_back_to_lobby()
@@ -98,11 +103,24 @@ function OnWorldPostUpdate()
 			exit_lobby();
 		end
 	end
-	if mod_config.enable_teleport_back_up then
-		local px, py = EntityGetTransform(player_id);
+	for _, workshop in ipairs(EntityGetWithTag("workshop")) do
+		local x, y = EntityGetTransform(workshop);
+		local custom_workshop = EntityGetClosestWithTag(x, y, "persistence_workshop");
+		local custom_x, custom_y = EntityGetTransform(custom_workshop);
+		if custom_workshop == nil or custom_workshop == 0 or (x - custom_x) * (y - custom_y) > 10 then
+			custom_workshop = EntityLoad("mods/persistence/files/workshop_collider.xml", x, y);
+			local workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent");
+			local custom_workshop_hitbox_comp = EntityGetFirstComponentIncludingDisabled(custom_workshop, "HitboxComponent");
+			ComponentSetValue(custom_workshop_hitbox_comp, "aabb_min_x", ComponentGetValue(workshop_hitbox_comp, "aabb_min_x"));
+			ComponentSetValue(custom_workshop_hitbox_comp, "aabb_min_y", ComponentGetValue(workshop_hitbox_comp, "aabb_min_y"));
+			ComponentSetValue(custom_workshop_hitbox_comp, "aabb_max_x", ComponentGetValue(workshop_hitbox_comp, "aabb_max_x"));
+			ComponentSetValue(custom_workshop_hitbox_comp, "aabb_max_y", ComponentGetValue(workshop_hitbox_comp, "aabb_max_y"));
+		end
+	end
+	local px, py = EntityGetTransform(player_id);
 		local is_in_workshop_before = is_in_workshop;
 		is_in_workshop = false;
-		for _, workshop in ipairs(EntityGetWithTag("workshop")) do
+		for _, workshop in ipairs(EntityGetWithTag(mod_config.reuseable_holy_mountain and "persistence_workshop" or "workshop")) do
 			local x, y = EntityGetTransform(workshop);
 			local hitbox_comp = EntityGetFirstComponentIncludingDisabled(workshop, "HitboxComponent");
 			local min_x = tonumber(ComponentGetValue(hitbox_comp, "aabb_min_x")) + x;
@@ -111,26 +129,38 @@ function OnWorldPostUpdate()
 			local max_y = tonumber(ComponentGetValue(hitbox_comp, "aabb_max_y")) + y;
 			if aabb_check(px, py, min_x, min_y, max_x, max_y) then
 				if not is_in_workshop and not is_in_workshop_before then
-					show_teleport_gui();
+					if mod_config.enable_teleport_back_up then
+						show_teleport_gui();
+					end
+					if mod_config.enable_menu_in_holy_mountain then
+						enter_lobby();
+						if inventory_open then
+							hide_menu_gui();
+						end
+					end
 				end
 				is_in_workshop = true;
 			end
 		end
 		if not is_in_workshop and is_in_workshop_before then
-			hide_teleport_gui();
+			if mod_config.enable_teleport_back_up then
+				hide_teleport_gui();
+			end
+			if mod_config.enable_menu_in_holy_mountain then
+				exit_lobby();
+			end
 		end
-	end
 	if tonumber(ComponentGetValue(inventory_gui, "mActive")) == 1 then
 		if not inventory_open then
 			inventory_open = true;
-			if is_in_lobby then
+			if menu_open then
 				hide_menu_gui();
 			end
 		end
 	else
 		if inventory_open then
 			inventory_open = false;
-			if is_in_lobby then
+			if menu_open then
 				show_menu_gui();
 			end
 		end

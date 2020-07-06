@@ -1,0 +1,8 @@
+<Entity name="persistence_workshop_collider" tags="teleportable_NOT,persistence_workshop">
+	<HitboxComponent 
+		aabb_min_x="0" 
+		aabb_min_y="0"
+		aabb_max_x="0" 
+		aabb_max_y="0">
+	</HitboxComponent>
+</Entity>
