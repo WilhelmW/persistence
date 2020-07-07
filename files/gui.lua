@@ -178,9 +178,8 @@ function show_research_wands_gui()
 
 	for pos, entity_id in pairs(wand_entity_ids) do
 		wands[pos] = {
-			["entity_id"] = entity_id;
-			["wand_data"] = read_wand(entity_id);
-			["price"] = research_wand_price(get_selected_save_id(), entity_id);
+			["entity_id"] = entity_id,
+			["wand_data"] = read_wand(entity_id)
 		};
 	end
 
@@ -198,17 +197,19 @@ function show_research_wands_gui()
 		GuiLayoutBeginVertical(gui, 0, 0);
 		for i = 0, 3 do
 			if wands[i] ~= nil then
-				if wands[i].price > 0 then
-					if wands[i].price > player_money then
-						GuiText(gui, 0, 0, tostring(wands[i].price) .. "$");
+				local price = research_wand_price(get_selected_save_id(), wands[i].entity_id);
+				local is_new = research_wand_is_new(get_selected_save_id(), wands[i].entity_id);
+				if is_new then
+					if price > player_money then
+						GuiText(gui, 0, 0, tostring(price) .. "$");
 					else
 						if #wands[i].wand_data.spells > 0 then
-							if GuiButton(gui, 0, 0, tostring(wands[i].price) .. "$", get_next_id()) then
+							if GuiButton(gui, 0, 0, tostring(price) .. "$", get_next_id()) then
 								research_wand(get_selected_save_id(), wands[i].entity_id);
 								wands[i] = nil;
 							end
 						else
-							if GuiButton(gui, 0, 0, tostring(wands[i].price) .. "$", get_next_id()) then
+							if GuiButton(gui, 0, 0, tostring(price) .. "$", get_next_id()) then
 								research_wand(get_selected_save_id(), wands[i].entity_id);
 								wands[i] = nil;
 							end
@@ -230,8 +231,10 @@ function show_research_wands_gui()
 		GuiLayoutBeginVertical(gui, 0, 0);
 		for i = 0, 3 do
 			if wands[i] ~= nil then
-				if wands[i].price > 0 then
-					if wands[i].price > player_money then
+				local price = research_wand_price(get_selected_save_id(), wands[i].entity_id);
+				local is_new = research_wand_is_new(get_selected_save_id(), wands[i].entity_id);
+				if is_new then
+					if price > player_money then
 						GuiText(gui, 0, 0, "You can't afford that");
 					else
 						if #wands[i].wand_data.spells > 0 then
