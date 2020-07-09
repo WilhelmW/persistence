@@ -1,12 +1,7 @@
-dofile_once("mods/persistence/config.lua");
 dofile_once("mods/persistence/files/helper.lua");
 
-local inventory_gui;
-local inventory2;
-local controls_component;
 local is_in_lobby = false;
 local inventory_open = false;
-local teleport_component;
 local screen_size_x, screen_size_y;
 local lobby_collider;
 local lobby_x, lobby_y;
@@ -27,27 +22,27 @@ local function exit_lobby()
 end
 
 function teleport_back_to_lobby()
-	EntitySetTransform(player_id, lobby_x, lobby_y);
+	EntitySetTransform(get_player_id(), lobby_x, lobby_y);
 end
 
 function disable_controlls()
-	EntitySetComponentIsEnabled(player_id, inventory_gui, false);
-	EntitySetComponentIsEnabled(player_id, inventory2, false);
-	EntitySetComponentIsEnabled(player_id, controls_component, false);
+	EntitySetComponentIsEnabled(get_player_id(), get_inventory_gui(), false);
+	EntitySetComponentIsEnabled(get_player_id(), get_inventory2(), false);
+	EntitySetComponentIsEnabled(get_player_id(), get_controls_component(), false);
 end
 
 function enable_controlls()
-	EntitySetComponentIsEnabled(player_id, controls_component, true);
-	EntitySetComponentIsEnabled(player_id, inventory2, true);
-	EntitySetComponentIsEnabled(player_id, inventory_gui, true);
+	EntitySetComponentIsEnabled(get_player_id(), get_controls_component(), true);
+	EntitySetComponentIsEnabled(get_player_id(), get_inventory2(), true);
+	EntitySetComponentIsEnabled(get_player_id(), get_inventory_gui(), true);
 end
 
 function update_screen_size()
-	teleport_component = EntityGetFirstComponentIncludingDisabled(player_id, "TeleportComponent");
+	teleport_component = EntityGetFirstComponentIncludingDisabled(get_player_id(), "TeleportComponent");
 	if teleport_component ~= nil and teleport_component ~= 0 then
-		EntitySetComponentIsEnabled(player_id, teleport_component, true);
+		EntitySetComponentIsEnabled(get_player_id(), teleport_component, true);
 	else
-		teleport_component = EntityAddComponent(player_id, "TeleportComponent", {});
+		EntityAddComponent(get_player_id(), "TeleportComponent", {});
 	end
 end
 
@@ -58,16 +53,17 @@ end
 local is_post_player_spawned = false;
 local is_in_workshop = false;
 function OnWorldPostUpdate()
-	if player_id == nil or not EntityGetIsAlive(player_id) then
+	if get_player_id() == nil or get_player_id() == 0 or not EntityGetIsAlive(get_player_id()) then
 		return;
 	end
 
-	if teleport_component ~= nil then
+	teleport_component = EntityGetFirstComponentIncludingDisabled(get_player_id(), "TeleportComponent");
+	if teleport_component ~= nil and teleport_component ~= 0 then
 		local a, b, c, d = ComponentGetValue2(teleport_component, "source_location_camera_aabb");
 		if a ~= 0 or b ~= 0 or c ~= 0 or d ~= 0 then
 			screen_size_x = math.floor(c - a + 0.5);
 			screen_size_y = math.floor(d - b + 0.5);
-			EntitySetComponentIsEnabled(player_id, teleport_component, false);
+			EntitySetComponentIsEnabled(get_player_id(), teleport_component, false);
 			ComponentSetValue2(teleport_component, "source_location_camera_aabb", 0, 0, 0, 0);
 		end
 	end
@@ -117,7 +113,7 @@ function OnWorldPostUpdate()
 			ComponentSetValue(custom_workshop_hitbox_comp, "aabb_max_y", ComponentGetValue(workshop_hitbox_comp, "aabb_max_y"));
 		end
 	end
-	local px, py = EntityGetTransform(player_id);
+	local px, py = EntityGetTransform(get_player_id());
 		local is_in_workshop_before = is_in_workshop;
 		is_in_workshop = false;
 		for _, workshop in ipairs(EntityGetWithTag(mod_config.reuseable_holy_mountain and "persistence_workshop" or "workshop")) do
@@ -150,7 +146,7 @@ function OnWorldPostUpdate()
 				exit_lobby();
 			end
 		end
-	if tonumber(ComponentGetValue(inventory_gui, "mActive")) == 1 then
+	if tonumber(ComponentGetValue(get_inventory_gui(), "mActive")) == 1 then
 		if not inventory_open then
 			inventory_open = true;
 			if menu_open then
@@ -168,18 +164,9 @@ function OnWorldPostUpdate()
 end
 
 function OnPlayerSpawned(player_entity)
-	player_id = player_entity;
-	wallet = EntityGetFirstComponentIncludingDisabled(player_id, "WalletComponent");
-	inventory_quick = EntityGetWithName("inventory_quick");
-	inventory_full = EntityGetWithName("inventory_full");
-	inventory_gui = EntityGetFirstComponentIncludingDisabled(player_id, "InventoryGuiComponent");
-	inventory2 = EntityGetFirstComponentIncludingDisabled(player_id, "Inventory2Component");
-	controls_component = EntityGetFirstComponentIncludingDisabled(player_id, "ControlsComponent");
-
 	lobby_collider = EntityGetWithName("persistence_lobby_collider");
 	if lobby_collider == nil or lobby_collider == 0 then
-		print("lobby collider spawned");
-		local x, y = EntityGetTransform(player_id);
+		local x, y = EntityGetTransform(get_player_id());
 		lobby_collider = EntityLoad("mods/persistence/files/lobby_collider.xml", x, y);
 	end
 	lobby_x, lobby_y = EntityGetTransform(lobby_collider);
@@ -188,6 +175,7 @@ function OnPlayerSpawned(player_entity)
 end
 
 function OnPostPlayerSpawned()
+	dofile_once("mods/persistence/config.lua");
 	dofile_once("mods/persistence/files/data_store.lua");
 	dofile_once("mods/persistence/files/gui.lua");
 

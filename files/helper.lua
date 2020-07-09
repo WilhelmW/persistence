@@ -6,8 +6,36 @@ function pad_number(number, length)
 	return number;
 end
 
+function get_player_id()
+	return EntityGetWithTag("player_unit")[1];
+end
+
+function get_wallet()
+	return EntityGetFirstComponentIncludingDisabled(get_player_id(), "WalletComponent");
+end
+
+function get_inventory_quick()
+	return EntityGetWithName("inventory_quick");
+end
+
+function get_inventory_full()
+	return EntityGetWithName("inventory_full");
+end
+
+function get_inventory_gui()
+	return EntityGetFirstComponentIncludingDisabled(get_player_id(), "InventoryGuiComponent");
+end
+
+function get_inventory2()
+	return EntityGetFirstComponentIncludingDisabled(get_player_id(), "Inventory2Component");
+end
+
+function get_controls_component()
+	return EntityGetFirstComponentIncludingDisabled(get_player_id(), "ControlsComponent");
+end
+
 function enable_edit_wands_in_lobby()
-	EntityAddChild(player_id, EntityLoad("mods/persistence/files/edit_wands_in_lobby.xml", 0, 0));
+	EntityAddChild(get_player_id(), EntityLoad("mods/persistence/files/edit_wands_in_lobby.xml", 0, 0));
 end
 
 function disable_edit_wands_in_lobby()

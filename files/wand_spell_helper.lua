@@ -1,4 +1,5 @@
 dofile_once("mods/persistence/config.lua");
+dofile_once("mods/persistence/files/helper.lua");
 dofile_once("data/scripts/gun/gun_actions.lua");
 dofile_once("data/scripts/gun/procedural/gun_procedural.lua");
 
@@ -123,7 +124,7 @@ function create_wand(wand_data)
 		return false;
 	end
 
-	local x, y = EntityGetTransform(player_id);
+	local x, y = EntityGetTransform(get_player_id());
 	local entity_id = EntityLoad("mods/persistence/files/wand_empty.xml", x, y);
 	local ability_comp = EntityGetFirstComponentIncludingDisabled(entity_id, "AbilityComponent");
 	local wand = wand_type_to_wand(wand_data["wand_type"]);
@@ -165,7 +166,7 @@ function create_spell(action_id)
 		return false;
 	end
 
-	local x, y = EntityGetTransform(player_id);
+	local x, y = EntityGetTransform(get_player_id());
 	CreateItemActionEntity(action_id, x, y);
 
 	set_player_money(get_player_money() - price);
@@ -174,10 +175,10 @@ end
 
 function get_all_wands()
 	local wands = {};
-	if inventory_quick == nil then
+	if get_inventory_quick() == nil then
 		return wands;
 	end
-	local inventory_quick_childs = EntityGetAllChildren(inventory_quick);
+	local inventory_quick_childs = EntityGetAllChildren(get_inventory_quick());
 	if inventory_quick_childs ~=nil then
 		for _, item in ipairs(inventory_quick_childs) do
 			if EntityHasTag(item, "wand") then
@@ -192,10 +193,10 @@ end
 
 function get_all_spells()
 	local spells = {};
-	if inventory_full == nil then
+	if get_inventory_full() == nil then
 		return spells;
 	end
-	local inventory_full_childs = EntityGetAllChildren(inventory_full);
+	local inventory_full_childs = EntityGetAllChildren(get_inventory_full());
 	if inventory_full_childs ~=nil then
 		for _, item in ipairs(inventory_full_childs) do
 			table.insert(spells, item);
