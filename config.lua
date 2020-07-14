@@ -8,6 +8,7 @@ mod_config = {
 	enable_teleport_back_up = true,
 	enable_menu_in_holy_mountain = false,
 	reuseable_holy_mountain = false,
+	always_choose_save_id = -1, -- -1 -> choose manualy, 0 -> choose to not use the mod, 1-5 -> choose saveslot
 	default_wands = {
 		{
 			name = "Handgun",

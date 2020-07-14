@@ -189,8 +189,24 @@ function OnPostPlayerSpawned()
 			set_selected_save_id(0);
 		else
 			load_save_ids();
-			disable_controlls();
-			show_save_selector_gui();
+			if mod_config.always_choose_save_id >= 0 then
+				if mod_config.always_choose_save_id == 0 then
+					set_selected_save_id(0);
+				else
+					if get_save_ids()[mod_config.always_choose_save_id] == nil then
+						set_selected_save_id(mod_config.always_choose_save_id);
+						create_new_save(mod_config.always_choose_save_id);
+						OnSaveAvailable(mod_config.always_choose_save_id);
+					else
+						set_selected_save_id(mod_config.always_choose_save_id);
+						load(mod_config.always_choose_save_id);
+						OnSaveAvailable(mod_config.always_choose_save_id);
+					end
+				end
+			else
+				disable_controlls();
+				show_save_selector_gui();
+			end
 		end
 	else
 		if selected_save_id ~= 0 then
