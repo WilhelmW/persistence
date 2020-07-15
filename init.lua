@@ -230,5 +230,5 @@ function OnPlayerDied(player_entity)
 	local money = get_player_money();
 	local money_to_save = math.floor(money * mod_config.money_to_keep_on_death);
 	GamePrintImportant("You died", "You lost " .. tostring(money - money_to_save) .. " Gold");
-	set_safe_money(get_selected_save_id(), get_safe_money(get_selected_save_id()) + money_to_save);
+	set_safe_money(get_selected_save_id(), math.abs(get_safe_money(get_selected_save_id()) + money_to_save));
 end
