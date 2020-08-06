@@ -8,7 +8,8 @@ mod_config = {
 	enable_teleport_back_up = true,
 	enable_menu_in_holy_mountain = false,
 	reuseable_holy_mountain = false,
-	always_choose_save_id = -1, -- -1 -> choose manualy, 0 -> choose to not use the mod, 1-5 -> choose saveslot
+	spawn_location_as_lobby_location = false, -- false -> the lobby location will be relative to the mouse controlls stone; true -> the lobby location will be on the spawn location
+	always_choose_save_id = -1, -- -1 -> choose manualy; 0 -> choose to not use the mod; 1-5 -> choose saveslot
 	default_wands = {
 		{
 			name = "Handgun",

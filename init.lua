@@ -53,6 +53,15 @@ end
 local is_post_player_spawned = false;
 local is_in_workshop = false;
 function OnWorldPostUpdate()
+	if lobby_collider == nil or lobby_collider == 0 then
+		local controls_mouse = EntityGetWithTag("controls_mouse")[1];
+		if controls_mouse ~= nil and controls_mouse ~= 0 then
+			local x, y = EntityGetTransform(controls_mouse);
+			lobby_collider = EntityLoad("mods/persistence/files/lobby_collider.xml", x - 50, y + 30);
+			lobby_x, lobby_y = EntityGetTransform(lobby_collider);
+		end
+	end
+
 	if get_player_id() == nil or get_player_id() == 0 or not EntityGetIsAlive(get_player_id()) then
 		return;
 	end
@@ -164,18 +173,22 @@ function OnWorldPostUpdate()
 end
 
 function OnPlayerSpawned(player_entity)
+	dofile_once("mods/persistence/config.lua");
 	lobby_collider = EntityGetWithName("persistence_lobby_collider");
 	if lobby_collider == nil or lobby_collider == 0 then
-		local x, y = EntityGetTransform(get_player_id());
-		lobby_collider = EntityLoad("mods/persistence/files/lobby_collider.xml", x, y);
+		if mod_config.spawn_location_as_lobby_location then
+			local x, y = EntityGetTransform(get_player_id());
+			lobby_collider = EntityLoad("mods/persistence/files/lobby_collider.xml", x, y);
+			lobby_x, lobby_y = EntityGetTransform(lobby_collider);
+		end
+	else
+		lobby_x, lobby_y = EntityGetTransform(lobby_collider);
 	end
-	lobby_x, lobby_y = EntityGetTransform(lobby_collider);
 
 	update_screen_size();
 end
 
 function OnPostPlayerSpawned()
-	dofile_once("mods/persistence/config.lua");
 	dofile_once("mods/persistence/files/data_store.lua");
 	dofile_once("mods/persistence/files/gui.lua");
 
