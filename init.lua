@@ -4,6 +4,7 @@ local is_in_lobby = false;
 local inventory_open = false;
 local screen_size_x, screen_size_y;
 local lobby_collider;
+local lobby_collider_enabled = false;
 local lobby_x, lobby_y;
 
 local menu_open = false;
@@ -84,6 +85,15 @@ function OnWorldPostUpdate()
 
 	if get_selected_save_id == nil or get_selected_save_id() == 0 then
 		return;
+	end
+
+	if not lobby_collider_enabled then
+		if lobby_collider ~= nil and lobby_collider ~= 0 then
+			for _, comp in ipairs(EntityGetAllComponents(lobby_collider)) do
+				EntitySetComponentIsEnabled(lobby_collider, comp, true);
+			end
+			lobby_collider_enabled = true;
+		end
 	end
 
 	if gui_update ~= nil then
@@ -230,9 +240,7 @@ function OnPostPlayerSpawned()
 end
 
 function OnSaveAvailable(save_id)
-	for _, comp in ipairs(EntityGetAllComponents(lobby_collider)) do
-		EntitySetComponentIsEnabled(lobby_collider, comp, true);
-	end
+
 end
 
 function OnPlayerDied(player_entity)
