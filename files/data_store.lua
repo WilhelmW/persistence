@@ -793,6 +793,9 @@ end
 
 function research_spell_price(entity_id)
 	local action_id = read_spell(entity_id);
+	if action_id == nil then
+		return nil
+	end
 	for i = 1, #actions do
 		if actions[i].id == action_id then
 			return math.ceil(actions[i].price * mod_config.research_spell_price_multiplier);
@@ -802,6 +805,9 @@ end
 
 function research_spell(save_id, entity_id)
 	local price = research_spell_price(entity_id);
+	if price == nil then
+		return false;
+	end
 	if get_player_money() < price then
 		return false;
 	end

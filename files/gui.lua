@@ -270,8 +270,10 @@ function show_research_spells_gui()
 
 	for i = 1, #spell_entity_ids do
 		local action_id = read_spell(spell_entity_ids[i]);
-		if researched_spells[action_id] == nil then
-			spell_data_temp[action_id] = spell_entity_ids[i];
+		if action_id ~= nil then
+			if researched_spells[action_id] == nil then
+				spell_data_temp[action_id] = spell_entity_ids[i];
+			end
 		end
 	end
 	for i = 1, #actions do
